@@ -115,7 +115,7 @@ class ReactionHandler extends ReactionCollector {
 			this[this.methodMap.get(reaction.emoji.id || reaction.emoji.name)](user);
 		});
 		this.on('end', () => {
-			if (this.reactionsDone && !this.message.deleted) this.message.reactions.removeAll();
+			if (this.reactionsDone && !this.message.deleted) this.message.reactions.removeAll().catch(() => null);
 		});
 	}
 
@@ -173,7 +173,7 @@ class ReactionHandler extends ReactionCollector {
 		const message = await this.message.channel.send(this.prompt);
 		const collected = await this.message.channel.awaitMessages(mess => mess.author === user, { max: 1, time: this.time });
 		this.awaiting = false;
-		await message.delete();
+		await message.delete().catch(() => null);
 		if (!collected.size) return;
 		const newPage = parseInt(collected.first().content);
 		collected.first().delete();
@@ -331,7 +331,7 @@ class ReactionHandler extends ReactionCollector {
 	async _queueEmojiReactions(emojis) {
 		if (this.message.deleted) return this.stop();
 		if (this.ended) return this.message.reactions.removeAll();
-		await this.message.react(emojis.shift());
+		await this.message.react(emojis.shift()).catch(() => null);
 		if (emojis.length) return this._queueEmojiReactions(emojis);
 		this.reactionsDone = true;
 		return null;
